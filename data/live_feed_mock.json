@@ -1,0 +1,37 @@
+{
+  "source": "simulated-accounting-api",
+  "as_of": "2026-01-05",
+  "note": "SIMULATED response -- stands in for a real accounting/banking API feed. No live credentials are used anywhere in this project.",
+  "transactions": [
+    {
+      "date": "2026-01-02",
+      "description": "Daily sales deposit",
+      "category": "Revenue",
+      "amount": 2140.55
+    },
+    {
+      "date": "2026-01-03",
+      "description": "Daily sales deposit",
+      "category": "Revenue",
+      "amount": 1980.1
+    },
+    {
+      "date": "2026-01-03",
+      "description": "Northwind Wholesale Supply - COGS",
+      "category": "COGS",
+      "amount": 6100.0
+    },
+    {
+      "date": "2026-01-04",
+      "description": "Daily sales deposit",
+      "category": "Revenue",
+      "amount": 2350.75
+    },
+    {
+      "date": "2026-01-05",
+      "description": "Metro Power & Water - Utilities",
+      "category": "Utilities",
+      "amount": 410.2
+    }
+  ]
+}
