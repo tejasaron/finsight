@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1220"/>
+      <stop offset="100%" stop-color="#131c31"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#5eead4"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- subtle grid -->
+  <g stroke="#1e293b" stroke-width="1">
+    <line x1="0" y1="150" x2="1200" y2="150"/>
+    <line x1="0" y1="290" x2="1200" y2="290"/>
+    <line x1="0" y1="430" x2="1200" y2="430"/>
+  </g>
+
+  <!-- upward trend line motif -->
+  <polyline points="80,430 260,390 420,410 580,320 740,340 900,220 1080,150"
+            fill="none" stroke="url(#line)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <g fill="#5eead4">
+    <circle cx="80" cy="430" r="6"/>
+    <circle cx="260" cy="390" r="6"/>
+    <circle cx="420" cy="410" r="6"/>
+    <circle cx="580" cy="320" r="6"/>
+    <circle cx="740" cy="340" r="6"/>
+    <circle cx="900" cy="220" r="6"/>
+  </g>
+  <circle cx="1080" cy="150" r="9" fill="#818cf8"/>
+
+  <!-- agent nodes (small orbiting dots representing the 5-agent system) -->
+  <g fill="none" stroke="#334155" stroke-width="1.5">
+    <circle cx="1080" cy="150" r="34"/>
+    <circle cx="1080" cy="150" r="58"/>
+  </g>
+  <g fill="#818cf8" opacity="0.9">
+    <circle cx="1114" cy="150" r="5"/>
+    <circle cx="1046" cy="150" r="5"/>
+    <circle cx="1080" cy="116" r="5"/>
+    <circle cx="1080" cy="184" r="5"/>
+  </g>
+
+  <!-- title -->
+  <text x="80" y="230" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="76" font-weight="700" fill="#f8fafc">FinSight</text>
+  <text x="80" y="278" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="26" fill="#94a3b8">A Financial Data Analyst Agent</text>
+
+  <!-- tagline row -->
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="20" fill="#5eead4">
+    <text x="80" y="500">Multi-Agent · ADK</text>
+    <text x="330" y="500" fill="#818cf8">MCP Server</text>
+    <text x="510" y="500" fill="#5eead4">Deterministic Analysis</text>
+    <text x="800" y="500" fill="#818cf8">Secure by Design</text>
+  </g>
+
+  <text x="80" y="560" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" fill="#64748b">Kaggle AI Agents Intensive Capstone — Agents for Business Track</text>
+</svg>
