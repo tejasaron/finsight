@@ -1,0 +1,68 @@
+transaction_id,date,description,category,account_type,amount,account_number
+2,2025-07-03,Daily register deposit,Revenue,revenue,4400.0,7734021198887701
+3,2025-07-07,Daily register deposit,Revenue,revenue,4400.0,7734021198887701
+4,2025-07-11,Daily register deposit,Revenue,revenue,4400.0,7734021198887701
+5,2025-07-15,Daily register deposit,Revenue,revenue,4400.0,7734021198887701
+6,2025-07-19,Daily register deposit,Revenue,revenue,4400.0,7734021198887701
+7,2025-07-05,Highland Roasters - coffee beans,COGS,expense,6358.0,5512340091122341
+8,2025-07-05,Sunrise Bakery - pastry supply,COGS,expense,1122.0,5512340091122342
+9,2025-07-01,Payroll run,Payroll,expense,9100.0,6612349912233440
+10,2025-07-01,Riverside Plaza lease,Rent,expense,2800.0,7712349911002234
+11,2025-07-10,Local radio ad spot,Marketing,expense,750.0,8812349900112235
+12,2025-07-15,City Power & Water,Utilities,expense,650,9912349900112236
+13,2025-08-03,Daily register deposit,Revenue,revenue,4488.0,7734021198887701
+14,2025-08-07,Daily register deposit,Revenue,revenue,4488.0,7734021198887701
+15,2025-08-11,Daily register deposit,Revenue,revenue,4488.0,7734021198887701
+16,2025-08-15,Daily register deposit,Revenue,revenue,4488.0,7734021198887701
+17,2025-08-19,Daily register deposit,Revenue,revenue,4488.0,7734021198887701
+18,2025-08-05,Highland Roasters - coffee beans,COGS,expense,6485.16,5512340091122341
+19,2025-08-05,Sunrise Bakery - pastry supply,COGS,expense,1144.44,5512340091122342
+20,2025-08-01,Payroll run,Payroll,expense,9100.0,6612349912233440
+21,2025-08-01,Riverside Plaza lease,Rent,expense,2800.0,7712349911002234
+22,2025-08-10,Local radio ad spot,Marketing,expense,750.0,8812349900112235
+23,2025-08-15,City Power & Water,Utilities,expense,670,9912349900112236
+24,2025-09-03,Daily register deposit,Revenue,revenue,4576.0,7734021198887701
+25,2025-09-07,Daily register deposit,Revenue,revenue,4576.0,7734021198887701
+26,2025-09-11,Daily register deposit,Revenue,revenue,4576.0,7734021198887701
+27,2025-09-15,Daily register deposit,Revenue,revenue,4576.0,7734021198887701
+28,2025-09-19,Daily register deposit,Revenue,revenue,4576.0,7734021198887701
+29,2025-09-05,Highland Roasters - coffee beans,COGS,expense,6612.32,5512340091122341
+30,2025-09-05,Sunrise Bakery - pastry supply,COGS,expense,1166.88,5512340091122342
+31,2025-09-01,Payroll run,Payroll,expense,9100.0,6612349912233440
+32,2025-09-01,Riverside Plaza lease,Rent,expense,2800.0,7712349911002234
+33,2025-09-10,Local radio ad spot,Marketing,expense,750.0,8812349900112235
+34,2025-09-15,City Power & Water,Utilities,expense,690,9912349900112236
+35,2025-10-03,Daily register deposit,Revenue,revenue,4664.0,7734021198887701
+36,2025-10-07,Daily register deposit,Revenue,revenue,4664.0,7734021198887701
+37,2025-10-11,Daily register deposit,Revenue,revenue,4664.0,7734021198887701
+38,2025-10-15,Daily register deposit,Revenue,revenue,4664.0,7734021198887701
+39,2025-10-19,Daily register deposit,Revenue,revenue,4664.0,7734021198887701
+40,2025-10-05,Highland Roasters - coffee beans,COGS,expense,6739.48,5512340091122341
+41,2025-10-05,Sunrise Bakery - pastry supply,COGS,expense,1189.32,5512340091122342
+42,2025-10-01,Payroll run,Payroll,expense,9100.0,6612349912233440
+43,2025-10-01,Riverside Plaza lease,Rent,expense,2800.0,7712349911002234
+44,2025-10-10,Local radio ad spot,Marketing,expense,750.0,8812349900112235
+45,2025-10-15,City Power & Water,Utilities,expense,710,9912349900112236
+46,2025-10-20,EMERGENCY: Espresso machine repair,Repairs,expense,2400.0,1112349900112237
+47,2025-11-03,Daily register deposit,Revenue,revenue,4752.0,7734021198887701
+48,2025-11-07,Daily register deposit,Revenue,revenue,4752.0,7734021198887701
+49,2025-11-11,Daily register deposit,Revenue,revenue,4752.0,7734021198887701
+50,2025-11-15,Daily register deposit,Revenue,revenue,4752.0,7734021198887701
+51,2025-11-19,Daily register deposit,Revenue,revenue,4752.0,7734021198887701
+52,2025-11-05,Highland Roasters - coffee beans,COGS,expense,6866.64,5512340091122341
+53,2025-11-05,Sunrise Bakery - pastry supply,COGS,expense,1211.76,5512340091122342
+54,2025-11-01,Payroll run,Payroll,expense,9100.0,6612349912233440
+55,2025-11-01,Riverside Plaza lease,Rent,expense,2800.0,7712349911002234
+56,2025-11-10,Local radio ad spot,Marketing,expense,750.0,8812349900112235
+57,2025-11-15,City Power & Water,Utilities,expense,730,9912349900112236
+58,2025-12-03,Daily register deposit,Revenue,revenue,6534.0,7734021198887701
+59,2025-12-07,Daily register deposit,Revenue,revenue,6534.0,7734021198887701
+60,2025-12-11,Daily register deposit,Revenue,revenue,6534.0,7734021198887701
+61,2025-12-15,Daily register deposit,Revenue,revenue,6534.0,7734021198887701
+62,2025-12-19,Daily register deposit,Revenue,revenue,6534.0,7734021198887701
+63,2025-12-05,Highland Roasters - coffee beans,COGS,expense,9441.63,5512340091122341
+64,2025-12-05,Sunrise Bakery - pastry supply,COGS,expense,1666.17,5512340091122342
+65,2025-12-01,Payroll run,Payroll,expense,9100.0,6612349912233440
+66,2025-12-01,Riverside Plaza lease,Rent,expense,2800.0,7712349911002234
+67,2025-12-10,Holiday promo campaign,Marketing,expense,1500.0,8812349900112235
+68,2025-12-15,City Power & Water,Utilities,expense,750,9912349900112236
