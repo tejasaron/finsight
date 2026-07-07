@@ -27,6 +27,7 @@ Security notes:
 """
 
 import json
+import math
 import os
 import re
 import sqlite3
@@ -48,36 +49,72 @@ _SQL_WRITE_KEYWORDS = re.compile(
     r"\b(INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|ATTACH|PRAGMA|REPLACE|VACUUM)\b", re.IGNORECASE
 )
 _PDF_LINE_RE = re.compile(r"^(.+?)\s+\$(-?[\d,]+\.\d{2})$", re.MULTILINE)
+_COGS_SYNONYMS = {"cogs", "cost of goods sold", "cost of good sold"}
 
 mcp = FastMCP("finsight-tools")
 
 
 # ---------------------------------------------------------------- helpers --
 
-def _resolve_path(file_path: str) -> Path:
-    p = Path(file_path)
-    return p if p.is_absolute() else (DATA_DIR / p)
+def _resolve_path(file_path: str) -> Path | None:
+    """Resolves a caller-supplied filename to a path INSIDE the data directory only.
+
+    Returns None if the requested path would escape the data directory (a
+    '..' traversal, or an absolute path elsewhere on disk) -- ingestion
+    tools only ever need to read demo files under DATA_DIR, and file_path
+    is ultimately model-controlled (it can be steered by injected text),
+    so this containment check is load-bearing, not a formality.
+    """
+    data_root = DATA_DIR.resolve()
+    candidate = (data_root / file_path).resolve()
+    if candidate != data_root and data_root not in candidate.parents:
+        return None
+    return candidate
 
 
 def _mask_account_number(raw) -> str | None:
     if raw is None or (isinstance(raw, float) and np.isnan(raw)):
         return None
     raw = str(raw).strip()
+    if raw.endswith(".0"):
+        # pandas silently upcasts an all-numeric column to float64 when any
+        # row in it is blank, turning e.g. "1234567890123456" into
+        # 1234567890123456.0 -- strip that artifact before masking.
+        raw = raw[:-2]
     if len(raw) < 4:
         return "****"
     return "*" * (len(raw) - 4) + raw[-4:]
 
 
 def _normalize_row(date_val, description, category, account_type, amount, account_number=None, source="") -> dict:
+    amount_f = float(amount)
+    if math.isnan(amount_f):
+        raise ValueError(f"amount is NaN/blank for row: {description!r}")
     return {
         "date": str(date_val)[:10],
         "description": str(description),
         "category": str(category),
         "type": str(account_type).strip().lower(),
-        "amount": round(float(amount), 2),
+        "amount": round(amount_f, 2),
         "account_number_masked": _mask_account_number(account_number),
         "source": source,
     }
+
+
+def _dataframe_to_records(df: "pd.DataFrame", source: str) -> tuple[list[dict], int]:
+    """Shared row-normalization loop used by both load_csv and load_excel."""
+    records, skipped = [], 0
+    for _, row in df.iterrows():
+        try:
+            records.append(
+                _normalize_row(
+                    row["date"], row["description"], row["category"], row["account_type"],
+                    row["amount"], row.get("account_number"), source=source,
+                )
+            )
+        except (ValueError, TypeError):
+            skipped += 1
+    return records, skipped
 
 
 def _load_active_dataset() -> list[dict]:
@@ -161,6 +198,8 @@ def load_csv(file_path: str) -> dict:
         or an 'error' key if the file is missing, empty, or malformed.
     """
     path = _resolve_path(file_path)
+    if path is None:
+        return {"error": "file_path must be inside the data directory."}
     if not path.exists():
         return {"error": f"File not found: {file_path}"}
     try:
@@ -169,20 +208,11 @@ def load_csv(file_path: str) -> dict:
         return {"error": f"Could not parse CSV: {e}"}
     if df.empty:
         return {"error": "CSV file has no rows."}
-    missing = REQUIRED_CSV_COLUMNS - {c.lower() for c in df.columns}
+    df.columns = [c.lower() for c in df.columns]
+    missing = REQUIRED_CSV_COLUMNS - set(df.columns)
     if missing:
         return {"error": f"CSV is missing required columns: {sorted(missing)}"}
-    records, skipped = [], 0
-    for _, row in df.iterrows():
-        try:
-            records.append(
-                _normalize_row(
-                    row["date"], row["description"], row["category"], row["account_type"],
-                    row["amount"], row.get("account_number"), source=f"csv:{path.name}",
-                )
-            )
-        except (ValueError, TypeError):
-            skipped += 1
+    records, skipped = _dataframe_to_records(df, source=f"csv:{path.name}")
     if not records:
         return {"error": "No valid rows could be parsed from this CSV."}
     total = _append_active_dataset(records)
@@ -204,6 +234,8 @@ def load_excel(file_path: str, sheet_name: str | None = None) -> dict:
         'available_sheets' if the requested sheet name doesn't exist.
     """
     path = _resolve_path(file_path)
+    if path is None:
+        return {"error": "file_path must be inside the data directory."}
     if not path.exists():
         return {"error": f"File not found: {file_path}"}
     try:
@@ -216,20 +248,11 @@ def load_excel(file_path: str, sheet_name: str | None = None) -> dict:
     df = xls.parse(target_sheet)
     if df.empty:
         return {"error": f"Sheet '{target_sheet}' has no rows."}
-    missing = REQUIRED_CSV_COLUMNS - {c.lower() for c in df.columns}
+    df.columns = [c.lower() for c in df.columns]
+    missing = REQUIRED_CSV_COLUMNS - set(df.columns)
     if missing:
         return {"error": f"Sheet is missing required columns: {sorted(missing)}"}
-    records, skipped = [], 0
-    for _, row in df.iterrows():
-        try:
-            records.append(
-                _normalize_row(
-                    row["date"], row["description"], row["category"], row["account_type"],
-                    row["amount"], row.get("account_number"), source=f"excel:{path.name}:{target_sheet}",
-                )
-            )
-        except (ValueError, TypeError):
-            skipped += 1
+    records, skipped = _dataframe_to_records(df, source=f"excel:{path.name}:{target_sheet}")
     if not records:
         return {"error": "No valid rows could be parsed from this sheet."}
     total = _append_active_dataset(records)
@@ -292,6 +315,8 @@ def query_database(sql: str) -> dict:
     stripped = sql.strip().rstrip(";")
     if not stripped.lower().startswith("select"):
         return {"error": "Only a single SELECT statement is permitted (read-only access)."}
+    if ";" in stripped:
+        return {"error": "Only a single statement is permitted -- remove the embedded ';'."}
     if _SQL_WRITE_KEYWORDS.search(stripped):
         return {"error": "Query contains a disallowed keyword; only simple SELECT statements are permitted."}
     if not LEDGER_DB_PATH.exists():
@@ -328,6 +353,8 @@ def extract_pdf_financials(file_path: str) -> dict:
         (e.g. a scanned image with no OCR layer).
     """
     path = _resolve_path(file_path)
+    if path is None:
+        return {"error": "file_path must be inside the data directory."}
     if not path.exists():
         return {"error": f"File not found: {file_path}"}
     try:
@@ -404,9 +431,10 @@ def compute_ratios() -> dict:
     division by zero by returning null (with a reason) instead of crashing.
 
     Returns:
-        A dict with revenue, total_expenses, net_income, gross_margin,
-        net_margin, and current_ratio (each null with a note if not
-        computable), or an 'error' key if no data has been loaded yet.
+        A dict with revenue, total_expenses, net_income, gross_margin and
+        net_margin (each null if revenue is zero), and current_ratio (null
+        with a 'current_ratio_note' if balance data isn't available), or
+        an 'error' key if no data has been loaded yet.
     """
     dataset = _load_active_dataset()
     if not dataset:
@@ -417,7 +445,9 @@ def compute_ratios() -> dict:
     for r in dataset:
         if r["type"] == "expense":
             expenses_by_cat[r["category"]] = expenses_by_cat.get(r["category"], 0) + r["amount"]
-    cogs = expenses_by_cat.get("COGS", 0.0)
+    # Match COGS case/spelling-insensitively -- ingestion sources are free to use
+    # whatever label they like (e.g. a PDF's "Cost of Goods Sold" vs a CSV's "COGS").
+    cogs = sum(v for k, v in expenses_by_cat.items() if k.strip().lower() in _COGS_SYNONYMS)
     total_expenses = sum(expenses_by_cat.values())
     gross_profit = revenue - cogs
     net_income = revenue - total_expenses

@@ -110,17 +110,26 @@ class FinSightSafetyPlugin(BasePlugin):
         super().__init__(name="finsight_safety_plugin")
 
     async def before_model_callback(self, *, callback_context, llm_request) -> Optional[LlmResponse]:
-        """Screens the incoming turn for prompt-injection attempts before the LLM ever sees it."""
-        user_text = _extract_last_user_text(llm_request)
-        if user_text and _matches_any(user_text, _PROMPT_INJECTION_PATTERNS):
-            logger.warning("Blocked suspected prompt injection: %r", user_text[:200])
+        """Screens the incoming turn for prompt-injection attempts before the LLM ever sees it.
+
+        Scans the last few content entries regardless of role, not just the
+        literal user message -- injection text can also arrive indirectly,
+        embedded in ingested data (e.g. a transaction description read from
+        a CSV/PDF/live feed), which surfaces to the model as tool/function
+        response content rather than a user-role turn.
+        """
+        recent_text = _extract_recent_text(llm_request)
+        if recent_text and _matches_any(recent_text, _PROMPT_INJECTION_PATTERNS):
+            logger.warning("Blocked suspected prompt injection: %r", recent_text[:200])
             return _text_response(INJECTION_BLOCK_MESSAGE)
         return None  # allow the call to proceed unchanged
 
     async def after_model_callback(self, *, callback_context, llm_response) -> Optional[LlmResponse]:
         """Screens the outgoing model response for hard-rule violations and redacts sensitive IDs."""
         response_text = _extract_response_text(llm_response)
-        if not response_text:
+        if not response_text or _has_function_call(llm_response):
+            # Never rewrite a response that also carries a pending tool call --
+            # reconstructing it as text-only would silently drop that call.
             return None
 
         if _matches_any(response_text, _TRANSACTION_EXECUTION_PATTERNS):
@@ -139,15 +148,22 @@ class FinSightSafetyPlugin(BasePlugin):
         return None
 
 
-def _extract_last_user_text(llm_request) -> str:
-    """Best-effort extraction of the latest user message text from an LlmRequest.contents list."""
+def _extract_recent_text(llm_request, lookback: int = 3) -> str:
+    """Concatenates text from the most recent few content entries, regardless of
+    role -- covers both the literal user message and tool/function-response
+    content (where data-borne injection text actually arrives)."""
     contents = getattr(llm_request, "contents", None) or []
-    for content in reversed(contents):
-        role = getattr(content, "role", None)
-        if role == "user":
-            parts = getattr(content, "parts", None) or []
-            return " ".join(getattr(p, "text", "") or "" for p in parts)
-    return ""
+    texts: list[str] = []
+    for content in contents[-lookback:]:
+        parts = getattr(content, "parts", None) or []
+        for p in parts:
+            text = getattr(p, "text", "") or ""
+            if text:
+                texts.append(text)
+            fr = getattr(p, "function_response", None)
+            if fr is not None:
+                texts.append(str(getattr(fr, "response", "")))
+    return " ".join(texts)
 
 
 def _extract_response_text(llm_response) -> str:
@@ -156,3 +172,11 @@ def _extract_response_text(llm_response) -> str:
         return ""
     parts = getattr(content, "parts", None) or []
     return " ".join(getattr(p, "text", "") or "" for p in parts)
+
+
+def _has_function_call(llm_response) -> bool:
+    content = getattr(llm_response, "content", None)
+    if not content:
+        return False
+    parts = getattr(content, "parts", None) or []
+    return any(getattr(p, "function_call", None) for p in parts)
