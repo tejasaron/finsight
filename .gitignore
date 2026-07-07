@@ -6,3 +6,4 @@ __pycache__/
 venv/
 data/_active_dataset.json
 data/_last_results.json
+adk_web.log
